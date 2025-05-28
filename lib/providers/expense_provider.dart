@@ -1,68 +1,104 @@
-// lib/providers/expense_provider.dart
-import 'package:hive/hive.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 import '../models/expense.dart';
 
-class ExpenseProvider extends ChangeNotifier {
-  final Box<Expense> _expenseBox;
-  List<Expense> _expenses = [];
-  bool _isLoading = false;
-  String? _error;
+/// Represents the state of the expense list with loading and error indicators.
+class ExpenseState {
+  final List<Expense> expenses;
+  final bool isLoading;
+  final String? error;
 
-  ExpenseProvider(this._expenseBox) {
+  ExpenseState({this.expenses = const [], this.isLoading = false, this.error});
+
+  ExpenseState copyWith({
+    List<Expense>? expenses,
+    bool? isLoading,
+    String? error,
+  }) {
+    return ExpenseState(
+      expenses: expenses ?? this.expenses,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
+  }
+}
+
+/// Manages state and business logic for the list of expenses.
+class ExpenseProvider extends StateNotifier<ExpenseState> {
+  final Box<Expense> box;
+
+  ExpenseProvider(this.box) : super(ExpenseState()) {
     _loadExpenses();
   }
 
-  List<Expense> get expenses => _expenses;
-  bool get isLoading => _isLoading;
-  String? get error => _error;
-
   Future<void> _loadExpenses() async {
+    state = state.copyWith(isLoading: true);
     try {
-      _isLoading = true;
-      notifyListeners();
-
-      _expenses = _expenseBox.values.toList();
-      _error = null;
+      final expenses = box.values.toList();
+      state = state.copyWith(expenses: expenses, isLoading: false, error: null);
     } catch (e) {
-      _error = 'Failed to load expenses';
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load expenses: ${e.toString()}',
+      );
       if (kDebugMode) print(e);
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
   }
 
   Future<void> addExpense(Expense expense) async {
+    state = state.copyWith(isLoading: true);
     try {
-      await _expenseBox.add(expense);
-      _expenses = _expenseBox.values.toList();
-      notifyListeners();
+      await box.add(expense);
+      state = state.copyWith(expenses: box.values.toList(), isLoading: false);
     } catch (e) {
-      _error = 'Failed to add expense';
-      notifyListeners();
+      state = state.copyWith(isLoading: false, error: 'Failed to add expense');
     }
   }
 
   Future<void> updateExpense(int key, Expense expense) async {
+    state = state.copyWith(isLoading: true);
     try {
-      await _expenseBox.put(key, expense);
-      _expenses = _expenseBox.values.toList();
-      notifyListeners();
+      await box.put(key, expense);
+      state = state.copyWith(expenses: box.values.toList(), isLoading: false);
     } catch (e) {
-      _error = 'Failed to update expense';
-      notifyListeners();
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to update expense',
+      );
     }
   }
 
   Future<void> deleteExpense(int key) async {
+    state = state.copyWith(isLoading: true);
     try {
-      await _expenseBox.delete(key);
-      _expenses = _expenseBox.values.toList();
-      notifyListeners();
+      await box.delete(key);
+      state = state.copyWith(expenses: box.values.toList(), isLoading: false);
     } catch (e) {
-      _error = 'Failed to delete expense';
-      notifyListeners();
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to delete expense',
+      );
     }
   }
 }
+
+/// Provides the Hive box for storing `Expense` items
+final expenseBoxProvider = FutureProvider<Box<Expense>>((ref) async {
+  return await Hive.openBox<Expense>('expenses');
+});
+
+/// Provides the state management for expenses using a `StateNotifierProvider`
+final expenseProvider = StateNotifierProvider<ExpenseProvider, ExpenseState>((
+  ref,
+) {
+  final box = ref
+      .watch(expenseBoxProvider)
+      .maybeWhen(data: (b) => b, orElse: () => null);
+
+  if (box == null) {
+    throw Exception('Hive box not yet loaded');
+  }
+
+  return ExpenseProvider(box);
+});
