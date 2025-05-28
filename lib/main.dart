@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'models/expense.dart';
 import 'routing/app_router.dart';
 
@@ -15,7 +16,7 @@ void main() async {
   // Open a box
   await Hive.openBox<Expense>('expenses');
 
-  runApp(MainApp());
+  runApp(ProviderScope(child: MainApp()));
 }
 
 class MainApp extends StatelessWidget {
