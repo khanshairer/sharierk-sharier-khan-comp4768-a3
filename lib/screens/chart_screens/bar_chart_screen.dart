@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // Fixed typo
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../../models/expense.dart'; // Fixed path
+import '../../models/expense.dart';
 import '../../providers/expense_provider.dart';
 import '../add_edit_screen.dart';
 
@@ -55,7 +55,9 @@ class BarChartScreen extends ConsumerWidget {
                           barTouchData: BarTouchData(
                             enabled: true,
                             touchTooltipData: BarTouchTooltipData(
-                              getTooltipBgColor: (_) => Colors.black87,
+                              tooltipBgColor: Colors.black87,
+                              tooltipPadding: const EdgeInsets.all(8),
+                              tooltipMargin: 8,
                               getTooltipItem:
                                   (
                                     group,
@@ -79,8 +81,6 @@ class BarChartScreen extends ConsumerWidget {
                                       ),
                                     ],
                                   ),
-                              maxContentWidth: 150,
-                              direction: TooltipDirection.top,
                             ),
                           ),
                           titlesData: FlTitlesData(
@@ -115,7 +115,7 @@ class BarChartScreen extends ConsumerWidget {
                               ),
                             ),
                           ),
-                          gridData: const FlGridData(show: true),
+                          gridData: FlGridData(show: true),
                           borderData: FlBorderData(show: false),
                           barGroups:
                               chartData
@@ -154,7 +154,6 @@ class BarChartScreen extends ConsumerWidget {
 
   List<ChartData> _processByCategory(List<Expense> expenses) {
     final categoryMap = <String, double>{};
-
     for (final expense in expenses) {
       categoryMap.update(
         expense.category,
