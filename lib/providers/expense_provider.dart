@@ -49,23 +49,33 @@ class ExpenseProvider extends StateNotifier<ExpenseState> {
   Future<void> addExpense(Expense expense) async {
     state = state.copyWith(isLoading: true);
     try {
-      await box.add(expense);
+      final key = await box.add(expense); // Get auto-generated key
+      final newExpense = expense.copyWith(hiveKey: key); // Update with key
+      await box.put(key, newExpense); // Store with key
       state = state.copyWith(expenses: box.values.toList(), isLoading: false);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: 'Failed to add expense');
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to add expense: ${e.toString()}',
+      );
+      if (kDebugMode) print(e);
     }
   }
 
   Future<void> updateExpense(int key, Expense expense) async {
     state = state.copyWith(isLoading: true);
     try {
-      await box.put(key, expense);
+      final updatedExpense = expense.copyWith(
+        hiveKey: key,
+      ); // Ensure key is preserved
+      await box.put(key, updatedExpense);
       state = state.copyWith(expenses: box.values.toList(), isLoading: false);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Failed to update expense',
+        error: 'Failed to update expense: ${e.toString()}',
       );
+      if (kDebugMode) print(e);
     }
   }
 
@@ -77,15 +87,31 @@ class ExpenseProvider extends StateNotifier<ExpenseState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Failed to delete expense',
+        error: 'Failed to delete expense: ${e.toString()}',
       );
+      if (kDebugMode) print(e);
+    }
+  }
+
+  Future<void> clearAllExpenses() async {
+    state = state.copyWith(isLoading: true);
+    try {
+      await box.clear();
+      state = state.copyWith(expenses: [], isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to clear expenses: ${e.toString()}',
+      );
+      if (kDebugMode) print(e);
     }
   }
 }
 
 /// Provides the Hive box for storing `Expense` items
 final expenseBoxProvider = FutureProvider<Box<Expense>>((ref) async {
-  return await Hive.openBox<Expense>('expenses');
+  await Hive.openBox<Expense>('expenses');
+  return Hive.box<Expense>('expenses');
 });
 
 /// Provides the state management for expenses using a `StateNotifierProvider`
@@ -94,11 +120,9 @@ final expenseProvider = StateNotifierProvider<ExpenseProvider, ExpenseState>((
 ) {
   final box = ref
       .watch(expenseBoxProvider)
-      .maybeWhen(data: (b) => b, orElse: () => null);
-
-  if (box == null) {
-    throw Exception('Hive box not yet loaded');
-  }
-
+      .maybeWhen(
+        data: (b) => b,
+        orElse: () => throw Exception('Hive box not yet loaded'),
+      );
   return ExpenseProvider(box);
 });
