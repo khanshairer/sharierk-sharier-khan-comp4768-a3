@@ -25,15 +25,15 @@ class AppRouter {
           // Chart routes
           GoRoute(
             path: 'charts/bar',
-            builder: (context, state) => const BarChartScreen(),
+            builder: (context, state) => BarChartScreen(),
           ),
           GoRoute(
             path: 'charts/line',
-            builder: (context, state) => const LineChartScreen(),
+            builder: (context, state) => LineChartScreen(),
           ),
           GoRoute(
             path: 'charts/pie',
-            builder: (context, state) => const PieChartScreen(),
+            builder: (context, state) => PieChartScreen(),
           ),
         ],
       ),
