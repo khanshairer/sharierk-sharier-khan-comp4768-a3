@@ -7,7 +7,7 @@ environment:
   sdk: ^3.7.2
 
 dependencies:
-  fl_chart: ^1.0.0
+  fl_chart: ^0.55.2
   flutter:
     sdk: flutter
   flutter_riverpod: ^2.6.1

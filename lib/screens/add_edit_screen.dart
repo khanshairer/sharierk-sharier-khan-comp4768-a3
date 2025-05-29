@@ -1,4 +1,3 @@
-// lib/screens/add_edit_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -34,10 +33,12 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
             ? ref
                 .read(expenseProvider)
                 .expenses
-                .firstWhere((e) => e.key.toString() == widget.expenseId)
+                .firstWhere((e) => e.hiveKey.toString() == widget.expenseId)
             : null;
 
-    _descriptionController = TextEditingController(text: expense?.name ?? '');
+    _descriptionController = TextEditingController(
+      text: expense?.description ?? '',
+    );
     _amountController = TextEditingController(
       text: expense?.amount.toString() ?? '',
     );
@@ -178,6 +179,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
         amount: double.parse(_amountController.text),
         date: _selectedDate,
         category: _selectedCategory,
+        hiveKey: widget.expenseId != null ? int.parse(widget.expenseId!) : null,
       );
 
       if (widget.expenseId != null) {
