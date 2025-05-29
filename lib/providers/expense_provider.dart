@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../models/expense.dart';
 
-/// Represents the state of the expense list with loading and error indicators.
+/// Represents the state of the expense list with loading and error indicators
 class ExpenseState {
   final List<Expense> expenses;
   final bool isLoading;
@@ -24,105 +24,118 @@ class ExpenseState {
   }
 }
 
-/// Manages state and business logic for the list of expenses.
-class ExpenseProvider extends StateNotifier<ExpenseState> {
-  final Box<Expense> box;
+/// Manages state and business logic for expenses
+class ExpenseNotifier extends StateNotifier<ExpenseState> {
+  final Box<Expense> _box;
 
-  ExpenseProvider(this.box) : super(ExpenseState()) {
-    _loadExpenses();
+  ExpenseNotifier(this._box) : super(ExpenseState()) {
+    loadExpenses();
   }
 
-  Future<void> _loadExpenses() async {
+  /// Load expenses from Hive
+  Future<void> loadExpenses() async {
     state = state.copyWith(isLoading: true);
     try {
-      final expenses = box.values.toList();
+      final expenses = _box.values.toList();
       state = state.copyWith(expenses: expenses, isLoading: false, error: null);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to load expenses: ${e.toString()}',
       );
-      if (kDebugMode) print(e);
+      debugPrint(e.toString());
     }
   }
 
+  /// Add a new expense
   Future<void> addExpense(Expense expense) async {
     state = state.copyWith(isLoading: true);
     try {
-      final key = await box.add(expense); // Get auto-generated key
-      final newExpense = expense.copyWith(hiveKey: key); // Update with key
-      await box.put(key, newExpense); // Store with key
-      state = state.copyWith(expenses: box.values.toList(), isLoading: false);
+      final key = await _box.add(expense);
+      final newExpense = expense.copyWith(hiveKey: key);
+      await _box.put(key, newExpense);
+      await loadExpenses(); // Refresh the list
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to add expense: ${e.toString()}',
       );
-      if (kDebugMode) print(e);
+      debugPrint(e.toString());
     }
   }
 
-  Future<void> updateExpense(int key, Expense expense) async {
+  /// Update an existing expense
+  Future<void> updateExpense(int key, Expense newExpense) async {
     state = state.copyWith(isLoading: true);
     try {
-      final updatedExpense = expense.copyWith(
-        hiveKey: key,
-      ); // Ensure key is preserved
-      await box.put(key, updatedExpense);
-      state = state.copyWith(expenses: box.values.toList(), isLoading: false);
+      final updatedExpense = newExpense.copyWith(hiveKey: key);
+      await _box.put(key, updatedExpense);
+      await loadExpenses(); // Refresh the list
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to update expense: ${e.toString()}',
       );
-      if (kDebugMode) print(e);
+      debugPrint(e.toString());
     }
   }
 
+  /// Delete an expense
   Future<void> deleteExpense(int key) async {
     state = state.copyWith(isLoading: true);
     try {
-      await box.delete(key);
-      state = state.copyWith(expenses: box.values.toList(), isLoading: false);
+      await _box.delete(key);
+      await loadExpenses(); // Refresh the list
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to delete expense: ${e.toString()}',
       );
-      if (kDebugMode) print(e);
+      debugPrint(e.toString());
     }
   }
 
+  /// Clear all expenses
   Future<void> clearAllExpenses() async {
     state = state.copyWith(isLoading: true);
     try {
-      await box.clear();
-      state = state.copyWith(expenses: [], isLoading: false);
+      await _box.clear();
+      state = state.copyWith(expenses: [], isLoading: false, error: null);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to clear expenses: ${e.toString()}',
       );
-      if (kDebugMode) print(e);
+      debugPrint(e.toString());
+    }
+  }
+
+  /// Get expense by key
+  Expense? getExpense(int key) {
+    try {
+      return _box.get(key);
+    } catch (e) {
+      debugPrint(e.toString());
+      return null;
     }
   }
 }
 
-/// Provides the Hive box for storing `Expense` items
+/// Provider for the Hive box
 final expenseBoxProvider = FutureProvider<Box<Expense>>((ref) async {
   await Hive.openBox<Expense>('expenses');
   return Hive.box<Expense>('expenses');
 });
 
-/// Provides the state management for expenses using a `StateNotifierProvider`
-final expenseProvider = StateNotifierProvider<ExpenseProvider, ExpenseState>((
+/// Main provider for expense state management
+final expenseProvider = StateNotifierProvider<ExpenseNotifier, ExpenseState>((
   ref,
 ) {
   final box = ref
       .watch(expenseBoxProvider)
       .maybeWhen(
-        data: (b) => b,
-        orElse: () => throw Exception('Hive box not yet loaded'),
+        data: (box) => box,
+        orElse: () => throw Exception('Hive box not initialized'),
       );
-  return ExpenseProvider(box);
+  return ExpenseNotifier(box);
 });
