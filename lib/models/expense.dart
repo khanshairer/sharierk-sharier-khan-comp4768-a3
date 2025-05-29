@@ -1,7 +1,4 @@
 import 'package:hive/hive.dart';
-
-part 'expense.g.dart'; // Generated file
-
 import 'package:hive/hive.dart';
 
 part 'expense.g.dart';
@@ -12,7 +9,7 @@ class Expense {
   final String description;
   @HiveField(1)
   final double amount;
-  @HiveField(2)S
+  @HiveField(2)
   final DateTime date;
   @HiveField(3)
   final String category;
