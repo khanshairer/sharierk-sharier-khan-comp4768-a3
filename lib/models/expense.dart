@@ -2,6 +2,10 @@ import 'package:hive/hive.dart';
 
 part 'expense.g.dart'; // Generated file
 
+import 'package:hive/hive.dart';
+
+part 'expense.g.dart';
+
 @HiveType(typeId: 0)
 class Expense {
   @HiveField(0)
@@ -13,13 +17,30 @@ class Expense {
   @HiveField(3)
   final String category;
   @HiveField(4)
-  final int? hiveKey; // Add this nullable field
+  final int? hiveKey;
 
   Expense({
     required this.description,
     required this.amount,
     required this.date,
     required this.category,
-    this.hiveKey, // Will be null for new expenses
+    this.hiveKey,
   });
+
+  // Add this copyWith method
+  Expense copyWith({
+    String? description,
+    double? amount,
+    DateTime? date,
+    String? category,
+    int? hiveKey,
+  }) {
+    return Expense(
+      description: description ?? this.description,
+      amount: amount ?? this.amount,
+      date: date ?? this.date,
+      category: category ?? this.category,
+      hiveKey: hiveKey ?? this.hiveKey,
+    );
+  }
 }
