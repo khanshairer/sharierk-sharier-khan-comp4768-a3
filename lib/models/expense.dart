@@ -12,7 +12,7 @@ class Expense {
   final String description;
   @HiveField(1)
   final double amount;
-  @HiveField(2)
+  @HiveField(2)S
   final DateTime date;
   @HiveField(3)
   final String category;
