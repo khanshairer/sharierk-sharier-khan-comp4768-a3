@@ -9,7 +9,10 @@ final routerProvider = Provider((ref) {
   return AppRouter().router;
 });
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(ExpenseAdapter()); // Add this
   runApp(ProviderScope(child: const MainApp()));
 }
 
