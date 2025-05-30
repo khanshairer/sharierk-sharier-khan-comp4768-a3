@@ -43,7 +43,7 @@ class BarChartScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(Icons.home),
+                  icon: const Icon(Icons.insert_chart),
                   onPressed: () => context.go('/see_charts'),
                   tooltip: 'Back to Charts',
                 ),
