@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/expense.dart';
 import '../../providers/expense_provider.dart';
-import '../add_edit_screen.dart';
 
 class PieChartScreen extends ConsumerStatefulWidget {
   @override
@@ -31,9 +31,24 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
       appBar: AppBar(
         title: const Text('Spending by Category'),
         actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: ElevatedButton(
+              onPressed: () => _safeNavigate(context, '/add'),
+              child: const Text('Add Expense'),
+            ),
+          ),
+          const SizedBox(width: 8),
           IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () => _showChartInfo(context),
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/see_charts'),
+            tooltip: 'Back to Charts',
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => ref.refresh(expenseProvider),
+            tooltip: 'Refresh Data',
           ),
         ],
       ),
@@ -51,17 +66,22 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
                         PieChartData(
                           pieTouchData: PieTouchData(
                             enabled: true,
-                            touchCallback: (event, pieTouchResponse) {
+                            touchCallback: (
+                              FlTouchEvent event,
+                              PieTouchResponse? pieTouchResponse,
+                            ) {
                               setState(() {
-                                if (!event.isInterestedForInteractions ||
-                                    pieTouchResponse?.touchedSection == null) {
+                                final touchedSection =
+                                    pieTouchResponse?.touchedSection;
+                                if (touchedSection == null ||
+                                    touchedSection.touchedSectionIndex < 0 ||
+                                    touchedSection.touchedSectionIndex >=
+                                        chartData.length) {
                                   touchedIndex = null;
-                                } else {
-                                  touchedIndex =
-                                      pieTouchResponse!
-                                          .touchedSection!
-                                          .touchedSectionIndex;
+                                  return;
                                 }
+                                touchedIndex =
+                                    touchedSection.touchedSectionIndex;
                               });
                             },
                           ),
@@ -69,12 +89,14 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
                           sectionsSpace: 4,
                           centerSpaceRadius: 60,
                           sections:
-                              chartData.map((data) {
-                                final isTouched = touchedIndex == data.index;
+                              chartData.asMap().entries.map((entry) {
+                                final index = entry.key;
+                                final data = entry.value;
+                                final isTouched = touchedIndex == index;
                                 final double radius = isTouched ? 32 : 24;
                                 return PieChartSectionData(
                                   color:
-                                      categoryColors[data.index %
+                                      categoryColors[index %
                                           categoryColors.length],
                                   value: data.amount,
                                   title:
@@ -92,7 +114,9 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
                         ),
                       ),
                     ),
-                    if (touchedIndex != null)
+                    if (touchedIndex != null &&
+                        touchedIndex! >= 0 &&
+                        touchedIndex! < chartData.length)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: Text(
@@ -108,6 +132,14 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
                 ),
               ),
     );
+  }
+
+  void _safeNavigate(BuildContext context, String route) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+        context.go(route);
+      }
+    });
   }
 
   List<CategoryData> _processByCategory(List<Expense> expenses) {
@@ -210,37 +242,11 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
           ),
           const SizedBox(height: 10),
           ElevatedButton(
-            onPressed:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AddEditScreen()),
-                ),
+            onPressed: () => _safeNavigate(context, '/add'),
             child: const Text('Add your first expense'),
           ),
         ],
       ),
-    );
-  }
-
-  void _showChartInfo(BuildContext context) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Chart Information'),
-            content: const Text(
-              'This pie chart shows your spending distribution across categories.\n\n'
-              '• Tap sections to see details\n'
-              '• Colors represent different categories\n'
-              '• Larger slices indicate higher spending',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Got it'),
-              ),
-            ],
-          ),
     );
   }
 }

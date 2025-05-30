@@ -18,7 +18,12 @@ class ListScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => context.push('/add'),
+            onPressed: () => context.go('/add'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.insert_chart),
+            onPressed: () => context.go('/see_charts'),
+            tooltip: 'View Charts',
           ),
         ],
       ),

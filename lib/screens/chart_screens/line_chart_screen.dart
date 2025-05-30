@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../models/expense.dart';
 import '../../providers/expense_provider.dart';
-import '../add_edit_screen.dart';
 
 class LineChartScreen extends ConsumerWidget {
   @override
@@ -18,8 +18,20 @@ class LineChartScreen extends ConsumerWidget {
         title: const Text('Spending Over Time'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => context.go('/add'),
+            tooltip: 'Add Expense',
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/see_charts'),
+            tooltip: 'Back to Charts',
+          ),
+          IconButton(
             icon: const Icon(Icons.info_outline),
             onPressed: () => _showChartInfo(context),
+            tooltip: 'Chart Information',
           ),
         ],
       ),
@@ -134,6 +146,14 @@ class LineChartScreen extends ConsumerWidget {
     );
   }
 
+  void _safeNavigate(BuildContext context, String route) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+        context.go(route);
+      }
+    });
+  }
+
   List<DailyTotal> _processByDate(List<Expense> expenses) {
     final dailyMap = <DateTime, double>{};
     final now = DateTime.now();
@@ -209,11 +229,7 @@ class LineChartScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           ElevatedButton(
-            onPressed:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AddEditScreen()),
-                ),
+            onPressed: () => _safeNavigate(context, '/add'),
             child: const Text('Add your first expense'),
           ),
         ],
@@ -222,24 +238,28 @@ class LineChartScreen extends ConsumerWidget {
   }
 
   void _showChartInfo(BuildContext context) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Chart Information'),
-            content: const Text(
-              'This line chart shows your daily spending trends over the last 30 days.\n\n'
-              '• Touch points to see exact amounts\n'
-              '• The shaded area indicates spending patterns',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Got it'),
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Chart Information'),
+                content: const Text(
+                  'This line chart shows your daily spending trends over the last 30 days.\n\n'
+                  '• Touch points to see exact amounts\n'
+                  '• The shaded area indicates spending patterns',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Got it'),
+                  ),
+                ],
               ),
-            ],
-          ),
-    );
+        );
+      }
+    });
   }
 }
 

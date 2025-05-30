@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models/expense.dart';
 import '../providers/expense_provider.dart';
+import 'package:go_router/go_router.dart';
 
 class AddEditScreen extends ConsumerStatefulWidget {
   final String? expenseId;
@@ -61,6 +62,19 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/'),
+            tooltip: 'Add Expense',
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.insert_chart),
+            onPressed: () => context.go('/see_charts'),
+            tooltip: 'View Charts',
+          ),
+        ],
         title: Text(widget.expenseId == null ? 'Add Expense' : 'Edit Expense'),
       ),
       body: Padding(
@@ -190,7 +204,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
         ref.read(expenseProvider.notifier).addExpense(expense);
       }
 
-      Navigator.pop(context);
+      context.go('/');
     }
   }
 }
