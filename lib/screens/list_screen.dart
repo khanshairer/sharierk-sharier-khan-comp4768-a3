@@ -28,10 +28,6 @@ class ListScreen extends ConsumerWidget {
         ],
       ),
       body: _buildBody(state, context, ref),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/add'),
-        child: const Icon(Icons.add),
-      ),
     );
   }
 
