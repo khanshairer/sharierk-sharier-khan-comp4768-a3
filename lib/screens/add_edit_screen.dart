@@ -1,9 +1,9 @@
-// lib/screens/add_edit_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models/expense.dart';
 import '../providers/expense_provider.dart';
+import 'package:go_router/go_router.dart';
 
 class AddEditScreen extends ConsumerStatefulWidget {
   final String? expenseId;
@@ -34,10 +34,12 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
             ? ref
                 .read(expenseProvider)
                 .expenses
-                .firstWhere((e) => e.key.toString() == widget.expenseId)
+                .firstWhere((e) => e.hiveKey.toString() == widget.expenseId)
             : null;
 
-    _descriptionController = TextEditingController(text: expense?.name ?? '');
+    _descriptionController = TextEditingController(
+      text: expense?.description ?? '',
+    );
     _amountController = TextEditingController(
       text: expense?.amount.toString() ?? '',
     );
@@ -60,6 +62,19 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/'),
+            tooltip: 'Add Expense',
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.insert_chart),
+            onPressed: () => context.go('/see_charts'),
+            tooltip: 'View Charts',
+          ),
+        ],
         title: Text(widget.expenseId == null ? 'Add Expense' : 'Edit Expense'),
       ),
       body: Padding(
@@ -178,6 +193,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
         amount: double.parse(_amountController.text),
         date: _selectedDate,
         category: _selectedCategory,
+        hiveKey: widget.expenseId != null ? int.parse(widget.expenseId!) : null,
       );
 
       if (widget.expenseId != null) {
@@ -188,7 +204,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
         ref.read(expenseProvider.notifier).addExpense(expense);
       }
 
-      Navigator.pop(context);
+      context.go('/');
     }
   }
 }
