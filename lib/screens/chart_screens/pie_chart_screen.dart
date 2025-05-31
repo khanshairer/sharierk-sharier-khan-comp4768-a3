@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/expense.dart';
 import '../../providers/expense_provider.dart';
-import '../add_edit_screen.dart';
 
 class PieChartScreen extends ConsumerStatefulWidget {
   @override
@@ -31,9 +31,25 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
       appBar: AppBar(
         title: const Text('Spending by Category'),
         actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: IconButton(
+              icon: const Icon(Icons.add),
+              tooltip: 'Add Expense',
+              onPressed: () => context.push('/add'),
+            ),
+          ),
+          const SizedBox(width: 8),
           IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () => _showChartInfo(context),
+            icon: const Icon(Icons.insert_chart),
+            onPressed: () => context.go('/see_charts'),
+            tooltip: 'Back to Charts',
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => ref.refresh(expenseProvider),
+            tooltip: 'Refresh Data',
           ),
         ],
       ),
@@ -51,36 +67,48 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
                         PieChartData(
                           pieTouchData: PieTouchData(
                             enabled: true,
-                            touchCallback: (event, pieTouchResponse) {
+                            touchCallback: (
+                              FlTouchEvent event,
+                              PieTouchResponse? pieTouchResponse,
+                            ) {
                               setState(() {
-                                if (!event.isInterestedForInteractions ||
-                                    pieTouchResponse?.touchedSection == null) {
+                                final touchedSection =
+                                    pieTouchResponse?.touchedSection;
+                                if (touchedSection == null ||
+                                    touchedSection.touchedSectionIndex < 0 ||
+                                    touchedSection.touchedSectionIndex >=
+                                        chartData.length) {
                                   touchedIndex = null;
-                                } else {
-                                  touchedIndex =
-                                      pieTouchResponse!
-                                          .touchedSection!
-                                          .touchedSectionIndex;
+                                  return;
                                 }
+                                touchedIndex =
+                                    touchedSection.touchedSectionIndex;
                               });
                             },
                           ),
                           borderData: FlBorderData(show: false),
-                          sectionsSpace: 4,
-                          centerSpaceRadius: 60,
+                          sectionsSpace: 2,
+                          centerSpaceRadius: 50,
                           sections:
-                              chartData.map((data) {
-                                final isTouched = touchedIndex == data.index;
-                                final double radius = isTouched ? 32 : 24;
+                              chartData.asMap().entries.map((entry) {
+                                final index = entry.key;
+                                final data = entry.value;
+                                final isTouched = touchedIndex == index;
+                                final double radius = isTouched ? 30 : 25;
+
+                                // Only show percentage if it's greater than 5%
+                                final showPercentage = data.percentage > 0.05;
+                                final percentageText =
+                                    showPercentage
+                                        ? '${(data.percentage * 100).toStringAsFixed(data.percentage > 0.1 ? 0 : 1)}%'
+                                        : '';
+
                                 return PieChartSectionData(
                                   color:
-                                      categoryColors[data.index %
+                                      categoryColors[index %
                                           categoryColors.length],
                                   value: data.amount,
-                                  title:
-                                      data.percentage > 0.1
-                                          ? '${(data.percentage * 100).toStringAsFixed(0)}%'
-                                          : '',
+                                  title: percentageText,
                                   radius: radius,
                                   titleStyle: const TextStyle(
                                     fontSize: 14,
@@ -92,7 +120,9 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
                         ),
                       ),
                     ),
-                    if (touchedIndex != null)
+                    if (touchedIndex != null &&
+                        touchedIndex! >= 0 &&
+                        touchedIndex! < chartData.length)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: Text(
@@ -114,6 +144,7 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
     final categoryMap = <String, double>{};
     double total = 0;
 
+    // Process all expenses
     for (final expense in expenses) {
       categoryMap.update(
         expense.category,
@@ -123,17 +154,21 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
       total += expense.amount;
     }
 
-    return categoryMap.entries.toList().asMap().entries.map((entry) {
-        final index = entry.key;
-        final category = entry.value;
-        return CategoryData(
-          index,
-          category.key,
-          category.value,
-          total > 0 ? category.value / total : 0,
-        );
-      }).toList()
-      ..sort((a, b) => b.amount.compareTo(a.amount));
+    // Convert to sorted list with consistent indices
+    final sortedEntries =
+        categoryMap.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
+
+    return sortedEntries.asMap().entries.map((entry) {
+      final index = entry.key;
+      final category = entry.value;
+      return CategoryData(
+        index,
+        category.key,
+        category.value,
+        total > 0 ? category.value / total : 0,
+      );
+    }).toList();
   }
 
   double _getTotalAmount(List<CategoryData> data) {
@@ -210,37 +245,11 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
           ),
           const SizedBox(height: 10),
           ElevatedButton(
-            onPressed:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AddEditScreen()),
-                ),
+            onPressed: () => context.push('/add'),
             child: const Text('Add your first expense'),
           ),
         ],
       ),
-    );
-  }
-
-  void _showChartInfo(BuildContext context) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Chart Information'),
-            content: const Text(
-              'This pie chart shows your spending distribution across categories.\n\n'
-              '• Tap sections to see details\n'
-              '• Colors represent different categories\n'
-              '• Larger slices indicate higher spending',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Got it'),
-              ),
-            ],
-          ),
     );
   }
 }
