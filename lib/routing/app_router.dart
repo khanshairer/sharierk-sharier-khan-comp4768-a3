@@ -6,137 +6,62 @@ import '../screens/chart_screens/line_chart_screen.dart';
 import '../screens/chart_screens/pie_chart_screen.dart';
 import '../screens/see_charts.dart';
 import '../screens/list_screen.dart';
+import '../screens/add_edit_screen.dart';
 
 class AppRouter {
   final GoRouter router = GoRouter(
     routes: [
       GoRoute(
         path: '/',
-<<<<<<< HEAD
         pageBuilder:
-            (context, state) =>
-                MaterialPage<void>(key: state.pageKey, child: ListScreen()),
+            (context, state) => MaterialPage<void>(
+              key: state.pageKey, // Preserves state during transitions
+              child: ListScreen(), // Your initial screen widget
+            ),
       ),
       GoRoute(
         path: '/add',
         pageBuilder:
-            (context, state) =>
-                MaterialPage<void>(key: state.pageKey, child: AddEditScreen()),
-=======
-        pageBuilder: (context, state) => MaterialPage<void>(
-          key: state.pageKey,
-          child: ListScreen(),
-        ),
-      ),
-      GoRoute(
-        path: '/add',
-        pageBuilder: (context, state) => MaterialPage<void>(
-          key: state.pageKey,
-          child: AddEditScreen(),
-        ),
->>>>>>> 61db0636d432d07723b2dc85f4a66a174d64d767
-      ),
-      GoRoute(
-        path: 'edit/:id',
-        builder: (context, state) => AddEditScreen(expenseId: state.pathParameters['id']),
+            (context, state) => MaterialPage<void>(
+              key: state.pageKey, // Preserves state during transitions
+              child:
+                  AddEditScreen(), // Replace with your add expense screen widget
+            ),
       ),
       GoRoute(
         path: '/see_charts',
-<<<<<<< HEAD
         pageBuilder:
             (context, state) => MaterialPage<void>(
-              key: state.pageKey,
-              child: const SeeCharts(),
+              key: state.pageKey, // Preserves state during transitions
+              child: const SeeCharts(), // Your screen widget
             ),
       ),
       GoRoute(
         path: '/bar_chart',
         pageBuilder:
-            (context, state) =>
-                MaterialPage<void>(key: state.pageKey, child: BarChartScreen()),
+            (context, state) => MaterialPage<void>(
+              key: state.pageKey, // Preserves state during transitions
+              child: BarChartScreen(), // Your screen widget
+            ),
       ),
       GoRoute(
         path: '/line_chart',
         pageBuilder:
             (context, state) => MaterialPage<void>(
-              key: state.pageKey,
-              child: LineChartScreen(),
+              key: state.pageKey, // Preserves state during transitions
+              child:
+                  LineChartScreen(), // Replace with your line chart screen widget
             ),
       ),
       GoRoute(
         path: '/pie_chart',
         pageBuilder:
-            (context, state) =>
-                MaterialPage<void>(key: state.pageKey, child: PieChartScreen()),
+            (context, state) => MaterialPage<void>(
+              key: state.pageKey, // Preserves state during transitions
+              child:
+                  PieChartScreen(), // Replace with your pie chart screen widget
+            ),
       ),
     ],
-    errorBuilder:
-        (context, state) => Scaffold(
-          appBar: AppBar(title: const Text('Page Not Found')),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'No route found for: ${state.uri.toString()}',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => context.go('/'),
-                  child: const Text('Return Home'),
-                ),
-              ],
-            ),
-          ),
-        ),
-=======
-        pageBuilder: (context, state) => MaterialPage<void>(
-          key: state.pageKey,
-          child: const SeeCharts(),
-        ),
-      ),
-      GoRoute(
-        path: '/bar_chart',
-        pageBuilder: (context, state) => MaterialPage<void>(
-          key: state.pageKey,
-          child: BarChartScreen(),
-        ),
-      ),
-      GoRoute(
-        path: '/line_chart',
-        pageBuilder: (context, state) => MaterialPage<void>(
-          key: state.pageKey,
-          child: LineChartScreen(),
-        ),
-      ),
-      GoRoute(
-        path: '/pie_chart',
-        pageBuilder: (context, state) => MaterialPage<void>(
-          key: state.pageKey,
-          child: PieChartScreen(),
-        ),
-      ),
-    ],
-    errorBuilder: (context, state) => Scaffold(
-      appBar: AppBar(title: const Text('Page Not Found')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'No route found for: ${state.uri.toString()}',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => context.go('/'),
-              child: const Text('Return Home'),
-            ),
-          ],
-        ),
-      ),
-    ),
->>>>>>> 61db0636d432d07723b2dc85f4a66a174d64d767
   );
 }
