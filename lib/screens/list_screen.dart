@@ -73,7 +73,11 @@ class ListScreen extends ConsumerWidget {
                   DateFormat('MMM dd').format(expense.date),
                   style: const TextStyle(fontSize: 14),
                 ),
-                onTap: () => context.push('/edit/${expense.hiveKey}'),
+                onTap: () {
+                  if (expense.hiveKey != null) {
+                    context.go('/edit/${expense.hiveKey}');
+                  }
+                },
               ),
             ),
           );
