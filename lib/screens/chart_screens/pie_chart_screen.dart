@@ -31,25 +31,40 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
       appBar: AppBar(
         title: const Text('Spending by Category'),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(
-              icon: const Icon(Icons.add),
-              tooltip: 'Add Expense',
-              onPressed: () => context.push('/add'),
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.insert_chart),
-            onPressed: () => context.go('/see_charts'),
-            tooltip: 'Back to Charts',
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.refresh(expenseProvider),
-            tooltip: 'Refresh Data',
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Tooltip(
+                message: 'Add Expense',
+                child: IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () => context.push('/add'),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Tooltip(
+                message: 'Back to Charts',
+                child: IconButton(
+                  icon: const Icon(Icons.insert_chart),
+                  onPressed: () => context.go('/see_charts'),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Tooltip(
+                message: 'Refresh Data',
+                child: IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: () => ref.refresh(expenseProvider),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
           ),
         ],
       ),
@@ -95,8 +110,6 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
                                 final data = entry.value;
                                 final isTouched = touchedIndex == index;
                                 final double radius = isTouched ? 30 : 25;
-
-                                // Only show percentage if it's greater than 5%
                                 final showPercentage = data.percentage > 0.05;
                                 final percentageText =
                                     showPercentage
@@ -144,7 +157,6 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
     final categoryMap = <String, double>{};
     double total = 0;
 
-    // Process all expenses
     for (final expense in expenses) {
       categoryMap.update(
         expense.category,
@@ -154,7 +166,6 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
       total += expense.amount;
     }
 
-    // Convert to sorted list with consistent indices
     final sortedEntries =
         categoryMap.entries.toList()
           ..sort((a, b) => b.value.compareTo(a.value));
@@ -262,4 +273,3 @@ class CategoryData {
 
   CategoryData(this.index, this.category, this.amount, this.percentage);
 }
-// This class is used to hold the processed data for each category in the pie chart.
