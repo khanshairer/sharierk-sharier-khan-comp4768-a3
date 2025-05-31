@@ -33,9 +33,10 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: ElevatedButton(
+            child: IconButton(
+              icon: const Icon(Icons.add),
+              tooltip: 'Add Expense',
               onPressed: () => _safeNavigate(context, '/add'),
-              child: const Text('Add Expense'),
             ),
           ),
           const SizedBox(width: 8),
