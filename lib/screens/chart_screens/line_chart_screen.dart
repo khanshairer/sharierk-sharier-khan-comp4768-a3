@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../models/expense.dart';
 import '../../providers/expense_provider.dart';
-import '../add_edit_screen.dart';
 
-class LineChartScreen extends ConsumerWidget {
+class LineChartScreen extends ConsumerStatefulWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LineChartScreen> createState() => _LineChartScreenState();
+}
+
+class _LineChartScreenState extends ConsumerState<LineChartScreen> {
+  int _selectedTimeRange = 30; // Default to 30 days
+
+  @override
+  Widget build(BuildContext context) {
     final expenses = ref.watch(expenseProvider).expenses;
-    final chartData = _processByDate(expenses);
+    final chartData = _processByDate(expenses, _selectedTimeRange);
     final maxAmount = _getMaxAmount(chartData);
 
     return Scaffold(
@@ -18,8 +25,20 @@ class LineChartScreen extends ConsumerWidget {
         title: const Text('Spending Over Time'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => context.push('/add'),
+            tooltip: 'Add Expense',
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.insert_chart),
+            onPressed: () => context.go('/see_charts'),
+            tooltip: 'Back to Charts',
+          ),
+          IconButton(
             icon: const Icon(Icons.info_outline),
             onPressed: () => _showChartInfo(context),
+            tooltip: 'Chart Information',
           ),
         ],
       ),
@@ -36,29 +55,41 @@ class LineChartScreen extends ConsumerWidget {
                       child: LineChart(
                         LineChartData(
                           minX: 0,
-                          maxX: chartData.length.toDouble() - 1,
+                          maxX:
+                              chartData.length > 0
+                                  ? chartData.length.toDouble() - 1
+                                  : 0,
                           minY: 0,
-                          maxY: maxAmount * 1.2,
+                          maxY: maxAmount * 1.5,
                           lineTouchData: LineTouchData(
                             touchTooltipData: LineTouchTooltipData(
                               getTooltipItems:
                                   (spots) =>
-                                      spots.map((spot) {
-                                        return LineTooltipItem(
-                                          '${DateFormat('MMM dd').format(chartData[spot.x.toInt()].date)}\n',
-                                          const TextStyle(color: Colors.white),
-                                          children: [
-                                            TextSpan(
-                                              text:
-                                                  '\$${spot.y.toStringAsFixed(2)}',
-                                              style: const TextStyle(
+                                      spots
+                                          .map((spot) {
+                                            final index = spot.x.toInt();
+                                            if (index < 0 ||
+                                                index >= chartData.length)
+                                              return null;
+                                            return LineTooltipItem(
+                                              '${DateFormat('MMM dd').format(chartData[index].date)}\n',
+                                              const TextStyle(
                                                 color: Colors.white,
-                                                fontWeight: FontWeight.bold,
                                               ),
-                                            ),
-                                          ],
-                                        );
-                                      }).toList(),
+                                              children: [
+                                                TextSpan(
+                                                  text:
+                                                      '\$${spot.y.toStringAsFixed(2)}',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          })
+                                          .whereType<LineTooltipItem>()
+                                          .toList(),
                             ),
                           ),
                           gridData: FlGridData(show: true),
@@ -67,14 +98,21 @@ class LineChartScreen extends ConsumerWidget {
                               sideTitles: SideTitles(
                                 showTitles: true,
                                 getTitlesWidget: (value, meta) {
-                                  if (value.toInt() % 7 == 0 ||
-                                      value.toInt() == chartData.length - 1) {
+                                  if (value.toInt() %
+                                              (_selectedTimeRange ~/ 7) ==
+                                          0 ||
+                                      value.toInt() ==
+                                          (chartData.length > 0
+                                              ? chartData.length - 1
+                                              : 0)) {
                                     return Padding(
                                       padding: const EdgeInsets.only(top: 8.0),
                                       child: Text(
-                                        DateFormat(
-                                          'MMM dd',
-                                        ).format(chartData[value.toInt()].date),
+                                        DateFormat('MMM dd').format(
+                                          chartData.length > 0
+                                              ? chartData[value.toInt()].date
+                                              : DateTime.now(),
+                                        ),
                                         style: const TextStyle(fontSize: 10),
                                       ),
                                     );
@@ -93,7 +131,7 @@ class LineChartScreen extends ConsumerWidget {
                                       style: const TextStyle(fontSize: 10),
                                     ),
                                 reservedSize: 40,
-                                interval: maxAmount > 100 ? 50 : 20,
+                                interval: _calculateYInterval(maxAmount),
                               ),
                             ),
                           ),
@@ -134,14 +172,22 @@ class LineChartScreen extends ConsumerWidget {
     );
   }
 
-  List<DailyTotal> _processByDate(List<Expense> expenses) {
+  double _calculateYInterval(double maxAmount) {
+    if (maxAmount > 1000) return 200;
+    if (maxAmount > 500) return 100;
+    if (maxAmount > 200) return 50;
+    if (maxAmount > 100) return 25;
+    return 10;
+  }
+
+  List<DailyTotal> _processByDate(List<Expense> expenses, int days) {
     final dailyMap = <DateTime, double>{};
     final now = DateTime.now();
-    final thirtyDaysAgo = now.subtract(const Duration(days: 30));
+    final rangeStart = now.subtract(Duration(days: days));
 
     // Initialize all dates in range with 0
-    for (var i = 0; i <= 30; i++) {
-      final date = thirtyDaysAgo.add(Duration(days: i));
+    for (var i = 0; i <= days; i++) {
+      final date = rangeStart.add(Duration(days: i));
       dailyMap[DateTime(date.year, date.month, date.day)] = 0;
     }
 
@@ -152,8 +198,12 @@ class LineChartScreen extends ConsumerWidget {
         expense.date.month,
         expense.date.day,
       );
-      if (dailyMap.containsKey(date)) {
-        dailyMap[date] = dailyMap[date]! + expense.amount;
+      if (date.isAfter(rangeStart)) {
+        dailyMap.update(
+          date,
+          (value) => value + expense.amount,
+          ifAbsent: () => expense.amount,
+        );
       }
     }
 
@@ -173,20 +223,20 @@ class LineChartScreen extends ConsumerWidget {
       children: [
         ChoiceChip(
           label: const Text('7 Days'),
-          selected: false,
-          onSelected: (_) {},
+          selected: _selectedTimeRange == 7,
+          onSelected: (_) => setState(() => _selectedTimeRange = 7),
         ),
         const SizedBox(width: 8),
         ChoiceChip(
           label: const Text('30 Days'),
-          selected: true,
-          onSelected: (_) {},
+          selected: _selectedTimeRange == 30,
+          onSelected: (_) => setState(() => _selectedTimeRange = 30),
         ),
         const SizedBox(width: 8),
         ChoiceChip(
           label: const Text('90 Days'),
-          selected: false,
-          onSelected: (_) {},
+          selected: _selectedTimeRange == 90,
+          onSelected: (_) => setState(() => _selectedTimeRange = 90),
         ),
       ],
     );
@@ -209,11 +259,7 @@ class LineChartScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           ElevatedButton(
-            onPressed:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AddEditScreen()),
-                ),
+            onPressed: () => context.push('/add'),
             child: const Text('Add your first expense'),
           ),
         ],
@@ -228,13 +274,14 @@ class LineChartScreen extends ConsumerWidget {
           (context) => AlertDialog(
             title: const Text('Chart Information'),
             content: const Text(
-              'This line chart shows your daily spending trends over the last 30 days.\n\n'
+              'This line chart shows your daily spending trends.\n\n'
               '• Touch points to see exact amounts\n'
-              '• The shaded area indicates spending patterns',
+              '• The shaded area indicates spending patterns\n'
+              '• Use the time range selector to view different periods',
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.of(context).pop(),
                 child: const Text('Got it'),
               ),
             ],
