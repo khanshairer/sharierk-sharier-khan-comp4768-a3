@@ -4,17 +4,15 @@ import 'package:go_router/go_router.dart';
 class SeeCharts extends StatelessWidget {
   const SeeCharts({super.key});
 
-  // Universal text style
-  static const buttonTextStyle = TextStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.w500,
-  );
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         actions: [
+          IconButton(
+            onPressed: () => context.go('/add'), // Changed to go navigation
+            icon: const Icon(Icons.add),
+          ),
           IconButton(
             onPressed: () => context.go('/'),
             icon: const Icon(Icons.home),
@@ -26,28 +24,17 @@ class SeeCharts extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 200, // Wider button width
-              child: ElevatedButton(
-                onPressed: () => context.go('/bar_chart'),
-                child: const Text('Bar Chart', style: buttonTextStyle),
-              ),
+            ElevatedButton(
+              onPressed: () => context.go('/bar_chart'), // Changed to path
+              child: const Text('Bar Chart'),
             ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: 200, // Wider button width
-              child: ElevatedButton(
-                onPressed: () => context.go('/line_chart'),
-                child: const Text('Line Chart', style: buttonTextStyle),
-              ),
+            ElevatedButton(
+              onPressed: () => context.go('/line_chart'), // Changed to path
+              child: const Text('Line Chart'),
             ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: 200, // Wider button width
-              child: ElevatedButton(
-                onPressed: () => context.go('/pie_chart'),
-                child: const Text('Pie Chart', style: buttonTextStyle),
-              ),
+            ElevatedButton(
+              onPressed: () => context.go('/pie_chart'), // Changed to path
+              child: const Text('Pie Chart'),
             ),
           ],
         ),
