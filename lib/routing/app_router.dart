@@ -12,6 +12,17 @@ class AppRouter {
     routes: [
       GoRoute(
         path: '/',
+<<<<<<< HEAD
+        pageBuilder:
+            (context, state) =>
+                MaterialPage<void>(key: state.pageKey, child: ListScreen()),
+      ),
+      GoRoute(
+        path: '/add',
+        pageBuilder:
+            (context, state) =>
+                MaterialPage<void>(key: state.pageKey, child: AddEditScreen()),
+=======
         pageBuilder: (context, state) => MaterialPage<void>(
           key: state.pageKey,
           child: ListScreen(),
@@ -23,6 +34,7 @@ class AppRouter {
           key: state.pageKey,
           child: AddEditScreen(),
         ),
+>>>>>>> 61db0636d432d07723b2dc85f4a66a174d64d767
       ),
       GoRoute(
         path: 'edit/:id',
@@ -30,6 +42,55 @@ class AppRouter {
       ),
       GoRoute(
         path: '/see_charts',
+<<<<<<< HEAD
+        pageBuilder:
+            (context, state) => MaterialPage<void>(
+              key: state.pageKey,
+              child: const SeeCharts(),
+            ),
+      ),
+      GoRoute(
+        path: '/bar_chart',
+        pageBuilder:
+            (context, state) =>
+                MaterialPage<void>(key: state.pageKey, child: BarChartScreen()),
+      ),
+      GoRoute(
+        path: '/line_chart',
+        pageBuilder:
+            (context, state) => MaterialPage<void>(
+              key: state.pageKey,
+              child: LineChartScreen(),
+            ),
+      ),
+      GoRoute(
+        path: '/pie_chart',
+        pageBuilder:
+            (context, state) =>
+                MaterialPage<void>(key: state.pageKey, child: PieChartScreen()),
+      ),
+    ],
+    errorBuilder:
+        (context, state) => Scaffold(
+          appBar: AppBar(title: const Text('Page Not Found')),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'No route found for: ${state.uri.toString()}',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => context.go('/'),
+                  child: const Text('Return Home'),
+                ),
+              ],
+            ),
+          ),
+        ),
+=======
         pageBuilder: (context, state) => MaterialPage<void>(
           key: state.pageKey,
           child: const SeeCharts(),
@@ -76,5 +137,6 @@ class AppRouter {
         ),
       ),
     ),
+>>>>>>> 61db0636d432d07723b2dc85f4a66a174d64d767
   );
 }
