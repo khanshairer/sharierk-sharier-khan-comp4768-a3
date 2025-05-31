@@ -10,6 +10,10 @@ class SeeCharts extends StatelessWidget {
       appBar: AppBar(
         actions: [
           IconButton(
+            onPressed: () => context.push('/add'), // Changed to path
+            icon: const Icon(Icons.add),
+          ),
+          IconButton(
             onPressed: () => context.go('/'),
             icon: const Icon(Icons.home),
           ),
