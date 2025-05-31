@@ -36,7 +36,7 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
             child: IconButton(
               icon: const Icon(Icons.add),
               tooltip: 'Add Expense',
-              onPressed: () => _safeNavigate(context, '/add'),
+              onPressed: () => context.push('/add'),
             ),
           ),
           const SizedBox(width: 8),
@@ -87,23 +87,28 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
                             },
                           ),
                           borderData: FlBorderData(show: false),
-                          sectionsSpace: 4,
-                          centerSpaceRadius: 60,
+                          sectionsSpace: 2,
+                          centerSpaceRadius: 50,
                           sections:
                               chartData.asMap().entries.map((entry) {
                                 final index = entry.key;
                                 final data = entry.value;
                                 final isTouched = touchedIndex == index;
-                                final double radius = isTouched ? 32 : 24;
+                                final double radius = isTouched ? 30 : 25;
+
+                                // Only show percentage if it's greater than 5%
+                                final showPercentage = data.percentage > 0.05;
+                                final percentageText =
+                                    showPercentage
+                                        ? '${(data.percentage * 100).toStringAsFixed(data.percentage > 0.1 ? 0 : 1)}%'
+                                        : '';
+
                                 return PieChartSectionData(
                                   color:
                                       categoryColors[index %
                                           categoryColors.length],
                                   value: data.amount,
-                                  title:
-                                      data.percentage > 0.1
-                                          ? '${(data.percentage * 100).toStringAsFixed(0)}%'
-                                          : '',
+                                  title: percentageText,
                                   radius: radius,
                                   titleStyle: const TextStyle(
                                     fontSize: 14,
@@ -135,18 +140,11 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
     );
   }
 
-  void _safeNavigate(BuildContext context, String route) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (context.mounted) {
-        context.go(route);
-      }
-    });
-  }
-
   List<CategoryData> _processByCategory(List<Expense> expenses) {
     final categoryMap = <String, double>{};
     double total = 0;
 
+    // Process all expenses
     for (final expense in expenses) {
       categoryMap.update(
         expense.category,
@@ -156,17 +154,21 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
       total += expense.amount;
     }
 
-    return categoryMap.entries.toList().asMap().entries.map((entry) {
-        final index = entry.key;
-        final category = entry.value;
-        return CategoryData(
-          index,
-          category.key,
-          category.value,
-          total > 0 ? category.value / total : 0,
-        );
-      }).toList()
-      ..sort((a, b) => b.amount.compareTo(a.amount));
+    // Convert to sorted list with consistent indices
+    final sortedEntries =
+        categoryMap.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
+
+    return sortedEntries.asMap().entries.map((entry) {
+      final index = entry.key;
+      final category = entry.value;
+      return CategoryData(
+        index,
+        category.key,
+        category.value,
+        total > 0 ? category.value / total : 0,
+      );
+    }).toList();
   }
 
   double _getTotalAmount(List<CategoryData> data) {
@@ -243,7 +245,7 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
           ),
           const SizedBox(height: 10),
           ElevatedButton(
-            onPressed: () => _safeNavigate(context, '/add'),
+            onPressed: () => context.push('/add'),
             child: const Text('Add your first expense'),
           ),
         ],

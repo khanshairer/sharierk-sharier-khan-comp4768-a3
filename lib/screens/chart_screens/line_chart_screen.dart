@@ -19,7 +19,7 @@ class LineChartScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => context.go('/add'),
+            onPressed: () => context.push('/add'),
             tooltip: 'Add Expense',
           ),
           const SizedBox(width: 8),
@@ -48,29 +48,43 @@ class LineChartScreen extends ConsumerWidget {
                       child: LineChart(
                         LineChartData(
                           minX: 0,
-                          maxX: chartData.length.toDouble() - 1,
+                          maxX:
+                              chartData.length > 0
+                                  ? chartData.length.toDouble() - 1
+                                  : 0,
                           minY: 0,
-                          maxY: maxAmount * 1.2,
+                          maxY:
+                              maxAmount *
+                              1.5, // Increased to accommodate large values
                           lineTouchData: LineTouchData(
                             touchTooltipData: LineTouchTooltipData(
                               getTooltipItems:
                                   (spots) =>
-                                      spots.map((spot) {
-                                        return LineTooltipItem(
-                                          '${DateFormat('MMM dd').format(chartData[spot.x.toInt()].date)}\n',
-                                          const TextStyle(color: Colors.white),
-                                          children: [
-                                            TextSpan(
-                                              text:
-                                                  '\$${spot.y.toStringAsFixed(2)}',
-                                              style: const TextStyle(
+                                      spots
+                                          .map((spot) {
+                                            final index = spot.x.toInt();
+                                            if (index < 0 ||
+                                                index >= chartData.length)
+                                              return null;
+                                            return LineTooltipItem(
+                                              '${DateFormat('MMM dd').format(chartData[index].date)}\n',
+                                              const TextStyle(
                                                 color: Colors.white,
-                                                fontWeight: FontWeight.bold,
                                               ),
-                                            ),
-                                          ],
-                                        );
-                                      }).toList(),
+                                              children: [
+                                                TextSpan(
+                                                  text:
+                                                      '\$${spot.y.toStringAsFixed(2)}',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          })
+                                          .whereType<LineTooltipItem>()
+                                          .toList(),
                             ),
                           ),
                           gridData: FlGridData(show: true),
@@ -80,13 +94,18 @@ class LineChartScreen extends ConsumerWidget {
                                 showTitles: true,
                                 getTitlesWidget: (value, meta) {
                                   if (value.toInt() % 7 == 0 ||
-                                      value.toInt() == chartData.length - 1) {
+                                      value.toInt() ==
+                                          (chartData.length > 0
+                                              ? chartData.length - 1
+                                              : 0)) {
                                     return Padding(
                                       padding: const EdgeInsets.only(top: 8.0),
                                       child: Text(
-                                        DateFormat(
-                                          'MMM dd',
-                                        ).format(chartData[value.toInt()].date),
+                                        DateFormat('MMM dd').format(
+                                          chartData.length > 0
+                                              ? chartData[value.toInt()].date
+                                              : DateTime.now(),
+                                        ),
                                         style: const TextStyle(fontSize: 10),
                                       ),
                                     );
@@ -105,7 +124,7 @@ class LineChartScreen extends ConsumerWidget {
                                       style: const TextStyle(fontSize: 10),
                                     ),
                                 reservedSize: 40,
-                                interval: maxAmount > 100 ? 50 : 20,
+                                interval: _calculateYInterval(maxAmount),
                               ),
                             ),
                           ),
@@ -146,12 +165,12 @@ class LineChartScreen extends ConsumerWidget {
     );
   }
 
-  void _safeNavigate(BuildContext context, String route) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (context.mounted) {
-        context.go(route);
-      }
-    });
+  double _calculateYInterval(double maxAmount) {
+    if (maxAmount > 1000) return 200;
+    if (maxAmount > 500) return 100;
+    if (maxAmount > 200) return 50;
+    if (maxAmount > 100) return 25;
+    return 10;
   }
 
   List<DailyTotal> _processByDate(List<Expense> expenses) {
@@ -229,7 +248,7 @@ class LineChartScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           ElevatedButton(
-            onPressed: () => _safeNavigate(context, '/add'),
+            onPressed: () => context.push('/add'),
             child: const Text('Add your first expense'),
           ),
         ],
@@ -238,28 +257,24 @@ class LineChartScreen extends ConsumerWidget {
   }
 
   void _showChartInfo(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (context.mounted) {
-        showDialog(
-          context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('Chart Information'),
-                content: const Text(
-                  'This line chart shows your daily spending trends over the last 30 days.\n\n'
-                  '• Touch points to see exact amounts\n'
-                  '• The shaded area indicates spending patterns',
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Got it'),
-                  ),
-                ],
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Chart Information'),
+            content: const Text(
+              'This line chart shows your daily spending trends over the last 30 days.\n\n'
+              '• Touch points to see exact amounts\n'
+              '• The shaded area indicates spending patterns',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Got it'),
               ),
-        );
-      }
-    });
+            ],
+          ),
+    );
   }
 }
 
