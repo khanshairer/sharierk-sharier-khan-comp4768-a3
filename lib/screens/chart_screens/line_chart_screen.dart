@@ -6,11 +6,18 @@ import 'package:intl/intl.dart';
 import '../../models/expense.dart';
 import '../../providers/expense_provider.dart';
 
-class LineChartScreen extends ConsumerWidget {
+class LineChartScreen extends ConsumerStatefulWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LineChartScreen> createState() => _LineChartScreenState();
+}
+
+class _LineChartScreenState extends ConsumerState<LineChartScreen> {
+  int _selectedTimeRange = 30; // Default to 30 days
+
+  @override
+  Widget build(BuildContext context) {
     final expenses = ref.watch(expenseProvider).expenses;
-    final chartData = _processByDate(expenses);
+    final chartData = _processByDate(expenses, _selectedTimeRange);
     final maxAmount = _getMaxAmount(chartData);
 
     return Scaffold(
@@ -53,9 +60,7 @@ class LineChartScreen extends ConsumerWidget {
                                   ? chartData.length.toDouble() - 1
                                   : 0,
                           minY: 0,
-                          maxY:
-                              maxAmount *
-                              1.5, // Increased to accommodate large values
+                          maxY: maxAmount * 1.5,
                           lineTouchData: LineTouchData(
                             touchTooltipData: LineTouchTooltipData(
                               getTooltipItems:
@@ -93,7 +98,9 @@ class LineChartScreen extends ConsumerWidget {
                               sideTitles: SideTitles(
                                 showTitles: true,
                                 getTitlesWidget: (value, meta) {
-                                  if (value.toInt() % 7 == 0 ||
+                                  if (value.toInt() %
+                                              (_selectedTimeRange ~/ 7) ==
+                                          0 ||
                                       value.toInt() ==
                                           (chartData.length > 0
                                               ? chartData.length - 1
@@ -173,14 +180,14 @@ class LineChartScreen extends ConsumerWidget {
     return 10;
   }
 
-  List<DailyTotal> _processByDate(List<Expense> expenses) {
+  List<DailyTotal> _processByDate(List<Expense> expenses, int days) {
     final dailyMap = <DateTime, double>{};
     final now = DateTime.now();
-    final thirtyDaysAgo = now.subtract(const Duration(days: 30));
+    final rangeStart = now.subtract(Duration(days: days));
 
     // Initialize all dates in range with 0
-    for (var i = 0; i <= 30; i++) {
-      final date = thirtyDaysAgo.add(Duration(days: i));
+    for (var i = 0; i <= days; i++) {
+      final date = rangeStart.add(Duration(days: i));
       dailyMap[DateTime(date.year, date.month, date.day)] = 0;
     }
 
@@ -191,8 +198,12 @@ class LineChartScreen extends ConsumerWidget {
         expense.date.month,
         expense.date.day,
       );
-      if (dailyMap.containsKey(date)) {
-        dailyMap[date] = dailyMap[date]! + expense.amount;
+      if (date.isAfter(rangeStart)) {
+        dailyMap.update(
+          date,
+          (value) => value + expense.amount,
+          ifAbsent: () => expense.amount,
+        );
       }
     }
 
@@ -212,20 +223,20 @@ class LineChartScreen extends ConsumerWidget {
       children: [
         ChoiceChip(
           label: const Text('7 Days'),
-          selected: false,
-          onSelected: (_) {},
+          selected: _selectedTimeRange == 7,
+          onSelected: (_) => setState(() => _selectedTimeRange = 7),
         ),
         const SizedBox(width: 8),
         ChoiceChip(
           label: const Text('30 Days'),
-          selected: true,
-          onSelected: (_) {},
+          selected: _selectedTimeRange == 30,
+          onSelected: (_) => setState(() => _selectedTimeRange = 30),
         ),
         const SizedBox(width: 8),
         ChoiceChip(
           label: const Text('90 Days'),
-          selected: false,
-          onSelected: (_) {},
+          selected: _selectedTimeRange == 90,
+          onSelected: (_) => setState(() => _selectedTimeRange = 90),
         ),
       ],
     );
@@ -263,9 +274,10 @@ class LineChartScreen extends ConsumerWidget {
           (context) => AlertDialog(
             title: const Text('Chart Information'),
             content: const Text(
-              'This line chart shows your daily spending trends over the last 30 days.\n\n'
+              'This line chart shows your daily spending trends.\n\n'
               '• Touch points to see exact amounts\n'
-              '• The shaded area indicates spending patterns',
+              '• The shaded area indicates spending patterns\n'
+              '• Use the time range selector to view different periods',
             ),
             actions: [
               TextButton(
