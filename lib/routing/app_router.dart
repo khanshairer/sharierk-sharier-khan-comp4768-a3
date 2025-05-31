@@ -1,51 +1,74 @@
-import 'package:flutter/material.dart';
+import 'package:expense_tracker/screens/add_edit_screen.dart';
 import 'package:go_router/go_router.dart';
-import '../screens/list_screen.dart';
-import '../screens/add_edit_screen.dart';
+import 'package:flutter/material.dart';
 import '../screens/chart_screens/bar_chart_screen.dart';
 import '../screens/chart_screens/line_chart_screen.dart';
 import '../screens/chart_screens/pie_chart_screen.dart';
+import '../screens/see_charts.dart';
+import '../screens/list_screen.dart';
+import '../screens/add_edit_screen.dart';
 
 class AppRouter {
-  final router = GoRouter(
+  final GoRouter router = GoRouter(
     routes: [
-      // Main list view
       GoRoute(
         path: '/',
-        builder: (context, state) => const ListScreen(),
-        routes: [
-          // Add/edit expense (with ID parameter for edits)
-          GoRoute(
-            path: 'edit/:id',
-            builder:
-                (context, state) =>
-                    AddEditScreen(expenseId: state.pathParameters['id']),
-          ),
+        pageBuilder:
+            (context, state) => MaterialPage<void>(
+              key: state.pageKey, // Preserves state during transitions
+              child: ListScreen(), // Your initial screen widget
+            ),
+      ),
+      GoRoute(
+        path: '/add',
+        pageBuilder:
+            (context, state) => MaterialPage<void>(
+              key: state.pageKey, // Preserves state during transitions
+              child:
+                  AddEditScreen(), // Replace with your add expense screen widget
+            ),
+      ),
+      GoRoute(
+        path: 'edit/:id',
+        builder:
+            (context, state) =>
+                AddEditScreen(expenseId: state.pathParameters['id']),
+      ),
 
-          // Chart routes
-          GoRoute(
-            path: 'charts/bar',
-            builder: (context, state) => const BarChartScreen(),
-          ),
-          GoRoute(
-            path: 'charts/line',
-            builder: (context, state) => const LineChartScreen(),
-          ),
-          GoRoute(
-            path: 'charts/pie',
-            builder: (context, state) => const PieChartScreen(),
-          ),
-        ],
+      GoRoute(
+        path: '/see_charts',
+        pageBuilder:
+            (context, state) => MaterialPage<void>(
+              key: state.pageKey, // Preserves state during transitions
+              child: const SeeCharts(), // Your screen widget
+            ),
+      ),
+      GoRoute(
+        path: '/bar_chart',
+        pageBuilder:
+            (context, state) => MaterialPage<void>(
+              key: state.pageKey, // Preserves state during transitions
+              child: BarChartScreen(), // Your screen widget
+            ),
+      ),
+      GoRoute(
+        path: '/line_chart',
+        pageBuilder:
+            (context, state) => MaterialPage<void>(
+              key: state.pageKey, // Preserves state during transitions
+              child:
+                  LineChartScreen(), // Replace with your line chart screen widget
+            ),
+      ),
+      GoRoute(
+        path: '/pie_chart',
+        pageBuilder:
+            (context, state) => MaterialPage<void>(
+              key: state.pageKey, // Preserves state during transitions
+              child:
+                  PieChartScreen(), // Replace with your pie chart screen widget
+            ),
       ),
     ],
-    // Optional redirect logic
-    redirect: (context, state) {
-      // Example: Check auth status
-      // final isLoggedIn = context.read(authProvider).isAuthenticated;
-      // if (!isLoggedIn && !state.matchedLocation.startsWith('/login')) {
-      //   return '/login';
-      // }
-      return null;
-    },
   );
 }
