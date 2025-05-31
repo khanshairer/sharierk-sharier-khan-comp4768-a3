@@ -262,3 +262,4 @@ class CategoryData {
 
   CategoryData(this.index, this.category, this.amount, this.percentage);
 }
+// This class is used to hold the processed data for each category in the pie chart.

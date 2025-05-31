@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/expense.dart';
 import '../../providers/expense_provider.dart';
-import '../add_edit_screen.dart';
 
 class BarChartScreen extends ConsumerWidget {
   static const List<String> categories = [
@@ -32,9 +32,28 @@ class BarChartScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Spending by Category'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () => _showChartInfo(context),
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () => context.go('/add'),
+                  tooltip: 'Add Expense',
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.insert_chart),
+                  onPressed: () => context.go('/see_charts'),
+                  tooltip: 'Back to Charts',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.info_outline),
+                  onPressed: () => _showChartInfo(context),
+                  tooltip: 'Chart Info',
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -152,6 +171,39 @@ class BarChartScreen extends ConsumerWidget {
     );
   }
 
+  void _safeNavigate(BuildContext context, String route) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+        context.go(route);
+      }
+    });
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.bar_chart,
+            size: 50,
+            color: Theme.of(context).colorScheme.secondary,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'No expense data available',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () => _safeNavigate(context, '/add'),
+            child: const Text('Add your first expense'),
+          ),
+        ],
+      ),
+    );
+  }
+
   List<ChartData> _processByCategory(List<Expense> expenses) {
     final categoryMap = <String, double>{};
     for (final expense in expenses) {
@@ -205,54 +257,29 @@ class BarChartScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.bar_chart,
-            size: 50,
-            color: Theme.of(context).colorScheme.secondary,
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'No expense data available',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AddEditScreen()),
-                ),
-            child: const Text('Add your first expense'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showChartInfo(BuildContext context) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Chart Information'),
-            content: const Text(
-              'This chart visualizes your spending distribution across different categories.\n\n'
-              '• Tap on bars to see exact amounts\n'
-              '• Colors represent different categories',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Got it'),
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Chart Information'),
+                content: const Text(
+                  'This chart visualizes your spending distribution across different categories.\n\n'
+                  '• Tap on bars to see exact amounts\n'
+                  '• Colors represent different categories',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Got it'),
+                  ),
+                ],
               ),
-            ],
-          ),
-    );
+        );
+      }
+    });
   }
 }
 
