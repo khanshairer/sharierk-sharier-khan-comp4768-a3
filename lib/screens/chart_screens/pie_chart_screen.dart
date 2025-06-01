@@ -74,7 +74,7 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
                   constraints: const BoxConstraints(),
                 ),
               ),
-              const SizedBox(width: 2),
+              const SizedBox(width: 4),
             ],
           ),
         ],

@@ -4,6 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../models/expense.dart';
 import '../providers/expense_provider.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:open_file/open_file.dart';
+import 'package:excel/excel.dart';
+import 'package:universal_html/html.dart' as html;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ListScreen extends ConsumerWidget {
   const ListScreen({super.key});
@@ -38,6 +44,14 @@ class ListScreen extends ConsumerWidget {
             ),
             onPressed: () => context.go('/see_charts'),
             tooltip: 'View Charts',
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.file_download,
+              color: Color.fromARGB(255, 226, 180, 43),
+            ),
+            onPressed: () => _exportToExcel(state.expenses, context),
+            tooltip: 'Export to Excel',
           ),
         ],
         centerTitle: true,
@@ -242,5 +256,103 @@ class ListScreen extends ConsumerWidget {
               ),
         ) ??
         false;
+  }
+
+  Future<void> _exportToExcel(
+    List<Expense> expenses,
+    BuildContext context,
+  ) async {
+    try {
+      final excel = Excel.createExcel();
+      final sheet = excel['Expenses'];
+
+      // Set column widths
+      sheet.setColWidth(0, 30);
+      sheet.setColWidth(1, 15);
+      sheet.setColWidth(2, 20);
+      sheet.setColWidth(3, 15);
+
+      final headerStyle = CellStyle(
+        bold: true,
+        backgroundColorHex: "FFD700",
+        fontColorHex: "000000",
+        horizontalAlign: HorizontalAlign.Center,
+      );
+
+      sheet.appendRow(['Description', 'Amount (\$)', 'Category', 'Date']);
+
+      for (var i = 0; i < 4; i++) {
+        sheet
+            .cell(CellIndex.indexByString('${String.fromCharCode(65 + i)}1'))
+            .cellStyle = headerStyle;
+      }
+
+      for (final expense in expenses) {
+        sheet.appendRow([
+          expense.description,
+          expense.amount.toStringAsFixed(2),
+          expense.category,
+          DateFormat('yyyy-MM-dd').format(expense.date),
+        ]);
+      }
+
+      final fileBytes = excel.save();
+      if (fileBytes == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to generate Excel file')),
+        );
+        return;
+      }
+
+      final fileName =
+          'Expense_Report_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.xlsx';
+
+      if (kIsWeb) {
+        // ✅ Web: Use AnchorElement to download
+        final blob = html.Blob([fileBytes]);
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor =
+            html.AnchorElement(href: url)
+              ..setAttribute("download", fileName)
+              ..click();
+        html.Url.revokeObjectUrl(url);
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('File downloaded: $fileName')));
+      } else {
+        // ✅ Mobile/Desktop: Save and open
+        final dir = await getApplicationDocumentsDirectory();
+        final filePath = '${dir.path}/$fileName';
+        final file = File(filePath);
+        await file.writeAsBytes(fileBytes);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Exported to $fileName'),
+              action: SnackBarAction(
+                label: 'OPEN',
+                textColor: Colors.amber,
+                onPressed: () async {
+                  try {
+                    await OpenFile.open(filePath);
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Cannot open file: $e')),
+                    );
+                  }
+                },
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Excel export error: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+    }
   }
 }
