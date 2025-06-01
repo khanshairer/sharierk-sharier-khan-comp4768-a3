@@ -64,18 +64,39 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
       appBar: AppBar(
         actions: [
           IconButton(
-            icon: const Icon(Icons.home),
+            icon: const Icon(
+              Icons.home,
+              color: Color.fromARGB(255, 226, 180, 43),
+            ),
             onPressed: () => context.go('/'),
             tooltip: 'Add Expense',
           ),
           const SizedBox(width: 8),
           IconButton(
-            icon: const Icon(Icons.insert_chart),
+            icon: const Icon(
+              Icons.insert_chart,
+              color: Color.fromARGB(255, 226, 180, 43),
+            ),
             onPressed: () => context.go('/see_charts'),
             tooltip: 'View Charts',
           ),
         ],
-        title: Text(widget.expenseId == null ? 'Add Expense' : 'Edit Expense'),
+        centerTitle: true,
+        backgroundColor: Colors.blue[900],
+        leading: Icon(
+          Icons.build,
+          color: const Color.fromARGB(255, 226, 180, 43),
+          size: 30,
+        ),
+        title: Text(
+          widget.expenseId == null ? 'Add Expense' : 'Edit Expense',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(255, 226, 180, 43),
+            fontSize: 24,
+            letterSpacing: 0.6,
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -87,7 +108,10 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                 controller: _descriptionController,
                 decoration: const InputDecoration(
                   labelText: 'Description',
-                  prefixIcon: Icon(Icons.description),
+                  prefixIcon: Icon(
+                    Icons.description,
+                    color: Color.fromARGB(255, 226, 180, 43),
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -101,7 +125,10 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                 controller: _amountController,
                 decoration: const InputDecoration(
                   labelText: 'Amount',
-                  prefixIcon: Icon(Icons.attach_money),
+                  prefixIcon: Icon(
+                    Icons.attach_money,
+                    color: Color.fromARGB(255, 226, 180, 43),
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -119,6 +146,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
+                borderRadius: BorderRadius.circular(10),
                 value: _selectedCategory,
                 items:
                     const [
@@ -140,7 +168,10 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                 },
                 decoration: const InputDecoration(
                   labelText: 'Category',
-                  prefixIcon: Icon(Icons.category),
+                  prefixIcon: Icon(
+                    Icons.category,
+                    color: Color.fromARGB(255, 226, 180, 43),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -148,7 +179,10 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                 controller: _dateController,
                 decoration: const InputDecoration(
                   labelText: 'Date',
-                  prefixIcon: Icon(Icons.calendar_today),
+                  prefixIcon: Icon(
+                    Icons.calendar_today,
+                    color: Color.fromARGB(255, 226, 180, 43),
+                  ),
                 ),
                 readOnly: true,
                 onTap: () => _selectDate(context),
@@ -162,7 +196,20 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _submitForm,
-                child: const Text('Save Expense'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue[900],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 6,
+                ),
+                child: const Text(
+                  'Save Expense',
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 226, 180, 43),
+                    fontSize: 22,
+                  ),
+                ),
               ),
             ],
           ),
