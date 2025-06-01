@@ -40,6 +40,13 @@ class ListScreen extends ConsumerWidget {
             tooltip: 'View Charts',
           ),
         ],
+        centerTitle: true,
+        leading: Icon(
+          Icons.money,
+          color: Color.fromARGB(255, 226, 180, 43),
+          size: 30,
+        ),
+
         backgroundColor: Colors.blue[900],
       ),
       body: _buildBody(state, context, ref),
@@ -71,7 +78,7 @@ class ListScreen extends ConsumerWidget {
             ElevatedButton(
               onPressed: () => context.go('/add'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
+                backgroundColor: Colors.blue[900],
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -82,7 +89,10 @@ class ListScreen extends ConsumerWidget {
               ),
               child: const Text(
                 'Add Expense',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 226, 180, 43),
+                  fontSize: 18,
+                ),
               ),
             ),
           ],
