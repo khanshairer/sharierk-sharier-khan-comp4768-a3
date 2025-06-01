@@ -19,22 +19,28 @@ class ListScreen extends ConsumerWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 24,
-            color: Colors.white,
+            color: Color.fromARGB(255, 226, 180, 43),
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: Colors.white),
+            icon: const Icon(
+              Icons.add,
+              color: Color.fromARGB(255, 226, 180, 43),
+            ),
             onPressed: () => context.go('/add'),
             tooltip: 'Add Expense',
           ),
           IconButton(
-            icon: const Icon(Icons.insert_chart, color: Colors.white),
+            icon: const Icon(
+              Icons.insert_chart,
+              color: Color.fromARGB(255, 226, 180, 43),
+            ),
             onPressed: () => context.go('/see_charts'),
             tooltip: 'View Charts',
           ),
         ],
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.blue[900],
       ),
       body: _buildBody(state, context, ref),
     );
@@ -124,7 +130,12 @@ class ListScreen extends ConsumerWidget {
                 title: Text(
                   expense.description,
                   style: const TextStyle(
-                    color: Color.fromRGBO(4, 202, 34, 1),
+                    color: Color.fromARGB(
+                      255,
+                      14,
+                      77,
+                      172,
+                    ), // Text color for the title
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
                   ),
