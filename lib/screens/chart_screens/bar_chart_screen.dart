@@ -27,28 +27,39 @@ class BarChartScreen extends ConsumerWidget {
     final expenses = ref.watch(expenseProvider).expenses;
     final chartData = _processByCategory(expenses);
     final maxAmount = _getMaxAmount(chartData);
+    const iconColors = Color.fromARGB(255, 226, 180, 43);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Spending by Category'),
+        title: const Text(
+          'Expenses by Category',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: Color.fromARGB(255, 226, 180, 43),
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue[900],
+        leading: Icon(Icons.bar_chart, color: iconColors, size: 30),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.add),
+                  icon: const Icon(Icons.add, color: iconColors),
                   onPressed: () => context.go('/add'),
                   tooltip: 'Add Expense',
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 IconButton(
-                  icon: const Icon(Icons.insert_chart),
+                  icon: const Icon(Icons.insert_chart, color: iconColors),
                   onPressed: () => context.go('/see_charts'),
                   tooltip: 'Back to Charts',
                 ),
                 IconButton(
-                  icon: const Icon(Icons.info_outline),
+                  icon: const Icon(Icons.info_outline, color: iconColors),
                   onPressed: () => _showChartInfo(context),
                   tooltip: 'Chart Info',
                 ),
@@ -197,7 +208,20 @@ class BarChartScreen extends ConsumerWidget {
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () => _safeNavigate(context, '/add'),
-            child: const Text('Add your first expense'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue[900],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 6,
+            ),
+            child: const Text(
+              'Add your first expense',
+              style: TextStyle(
+                color: Color.fromARGB(255, 226, 180, 43),
+                fontSize: 22,
+              ),
+            ),
           ),
         ],
       ),

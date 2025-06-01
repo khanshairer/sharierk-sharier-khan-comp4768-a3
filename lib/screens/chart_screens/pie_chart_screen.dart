@@ -29,27 +29,53 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Spending by Category'),
+        title: const Text(
+          'Expenses by Category',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(255, 226, 180, 43),
+            fontSize: 18,
+            letterSpacing: 0.6,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue[900],
+        leading: Icon(
+          Icons.pie_chart,
+          color: Color.fromARGB(255, 226, 180, 43),
+          size: 30,
+        ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(
-              icon: const Icon(Icons.add),
-              tooltip: 'Add Expense',
-              onPressed: () => context.push('/add'),
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.insert_chart),
-            onPressed: () => context.go('/see_charts'),
-            tooltip: 'Back to Charts',
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.refresh(expenseProvider),
-            tooltip: 'Refresh Data',
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Tooltip(
+                message: 'Add Expense',
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.add,
+                    color: Color.fromARGB(255, 226, 180, 43),
+                  ),
+                  onPressed: () => context.push('/add'),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ),
+              const SizedBox(width: 2),
+              Tooltip(
+                message: 'Back to Charts',
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.insert_chart,
+                    color: Color.fromARGB(255, 226, 180, 43),
+                  ),
+                  onPressed: () => context.go('/see_charts'),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ),
+              const SizedBox(width: 4),
+            ],
           ),
         ],
       ),
@@ -95,8 +121,6 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
                                 final data = entry.value;
                                 final isTouched = touchedIndex == index;
                                 final double radius = isTouched ? 30 : 25;
-
-                                // Only show percentage if it's greater than 5%
                                 final showPercentage = data.percentage > 0.05;
                                 final percentageText =
                                     showPercentage
@@ -144,7 +168,6 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
     final categoryMap = <String, double>{};
     double total = 0;
 
-    // Process all expenses
     for (final expense in expenses) {
       categoryMap.update(
         expense.category,
@@ -154,7 +177,6 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
       total += expense.amount;
     }
 
-    // Convert to sorted list with consistent indices
     final sortedEntries =
         categoryMap.entries.toList()
           ..sort((a, b) => b.value.compareTo(a.value));
@@ -246,7 +268,21 @@ class _PieChartScreenState extends ConsumerState<PieChartScreen> {
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () => context.push('/add'),
-            child: const Text('Add your first expense'),
+            child: const Text(
+              'Add your first expense',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 226, 180, 43),
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue[900],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
           ),
         ],
       ),
@@ -262,4 +298,3 @@ class CategoryData {
 
   CategoryData(this.index, this.category, this.amount, this.percentage);
 }
-// This class is used to hold the processed data for each category in the pie chart.
