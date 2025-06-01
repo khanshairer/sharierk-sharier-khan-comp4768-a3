@@ -6,10 +6,10 @@ class SeeCharts extends StatelessWidget {
 
   // Define uniform text style
   static const buttonTextStyle = TextStyle(
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: FontWeight.bold,
-    color: Colors.white,
-    letterSpacing: 0.5,
+    color: Color.fromARGB(255, 226, 180, 43),
+    letterSpacing: 0.6,
   );
 
   @override
@@ -19,18 +19,37 @@ class SeeCharts extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () => context.push('/add'),
-            icon: const Icon(Icons.add),
+            icon: const Icon(
+              Icons.add,
+              color: Color.fromARGB(255, 226, 180, 43),
+            ),
             tooltip: 'Add Expense',
           ),
           IconButton(
             onPressed: () => context.go('/'),
-            icon: const Icon(Icons.home),
+            icon: const Icon(
+              Icons.home,
+              color: Color.fromARGB(255, 226, 180, 43),
+            ),
+
             tooltip: 'Home',
           ),
         ],
         title: const Text(
-          'See Charts',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          'All Charts',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(255, 226, 180, 43),
+            fontSize: 24,
+            letterSpacing: 0.6,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue[900],
+        leading: Icon(
+          Icons.insert_chart,
+          color: const Color.fromARGB(255, 226, 180, 43),
+          size: 30,
         ),
       ),
       body: Center(
@@ -44,16 +63,16 @@ class SeeCharts extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => context.go('/bar_chart'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
+                  backgroundColor: Colors.blue[900],
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  elevation: 4,
+                  elevation: 6,
                 ),
                 child: const Text('Bar Chart', style: buttonTextStyle),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
             // Line Chart Button
             SizedBox(
               width: 200,
@@ -61,7 +80,7 @@ class SeeCharts extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => context.go('/line_chart'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.greenAccent,
+                  backgroundColor: Colors.blue[900],
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -70,7 +89,7 @@ class SeeCharts extends StatelessWidget {
                 child: const Text('Line Chart', style: buttonTextStyle),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
             // Pie Chart Button
             SizedBox(
               width: 200,
@@ -78,7 +97,7 @@ class SeeCharts extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => context.go('/pie_chart'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orangeAccent,
+                  backgroundColor: Colors.blue[900],
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
