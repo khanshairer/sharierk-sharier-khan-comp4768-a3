@@ -14,7 +14,12 @@ dependencies:
   hive_flutter: ^1.1.0
   path_provider: ^2.1.5
   intl: ^0.20.2
-  fl_chart: ^0.55.2  
+  fl_chart: ^0.63.0
+  excel: ^2.0.1
+  permission_handler: ^11.3.0
+  open_file: ^3.3.1
+  universal_html: ^2.2.4
+
 
 
 
@@ -25,8 +30,10 @@ dev_dependencies:
   hive_generator: ^2.0.1
   build_runner: ^2.4.15
 
+
 dependency_overrides:
-  fl_chart: ^0.55.2 
+  fl_chart: ^0.63.0
+
 
 
 
