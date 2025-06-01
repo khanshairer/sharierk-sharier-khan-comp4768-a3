@@ -115,23 +115,6 @@ class BarChartScreen extends ConsumerWidget {
                           ),
                           titlesData: FlTitlesData(
                             show: true,
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                getTitlesWidget:
-                                    (value, meta) => Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
-                                      child: Text(
-                                        categories[value.toInt()],
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                reservedSize: 40,
-                              ),
-                            ),
                             leftTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
