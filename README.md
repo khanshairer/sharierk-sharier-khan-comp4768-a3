@@ -22,6 +22,12 @@
 - **path_provider & open_file** – For file system access and Excel export.
 - **excel** – Generate downloadable `.xlsx` reports.
 
+## 🔗 Web Version Demo
+▶️ Watch on YouTube : https://www.youtube.com/watch?v=KbEJLerfIMs
+
+## 📱 Android/iOS Version Demo
+▶️ Watch on YouTube : https://www.youtube.com/watch?v=TYCyqzQ3N6s
+
 ## 🚀 Getting Started
 
 1. **Clone the repo**:
@@ -29,3 +35,5 @@
    git clone https://github.com/khanshairer/sharierk-sharier-khan-comp4768-a3.git
    cd sharierk-sharier-khan-comp4768-a3
    flutter pub get
+
+
