@@ -28,3 +28,10 @@
    ```bash
    git clone https://github.com/khanshairer/sharierk-sharier-khan-comp4768-a3/expense_tracker.git
 
+2. Web Version Demo :
+   ```bash
+   https://www.youtube.com/watch?v=KbEJLerfIMs
+
+3. Android/iOs Version Demo:
+```bash
+https://www.youtube.com/watch?v=TYCyqzQ3N6s
