@@ -22,25 +22,48 @@ class _LineChartScreenState extends ConsumerState<LineChartScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Spending Over Time'),
+        title: const Text(
+          'Expenditure Over Time',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: Color.fromARGB(255, 226, 180, 43),
+          ),
+        ),
+        leading: Icon(
+          Icons.stacked_line_chart,
+          color: const Color.fromARGB(255, 226, 180, 43),
+          size: 30,
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const Icon(
+              Icons.add,
+              color: Color.fromARGB(255, 226, 180, 43),
+            ),
             onPressed: () => context.push('/add'),
             tooltip: 'Add Expense',
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 2),
           IconButton(
-            icon: const Icon(Icons.insert_chart),
+            icon: const Icon(
+              Icons.insert_chart,
+              color: Color.fromARGB(255, 226, 180, 43),
+            ),
             onPressed: () => context.go('/see_charts'),
             tooltip: 'Back to Charts',
           ),
           IconButton(
-            icon: const Icon(Icons.info_outline),
+            icon: const Icon(
+              Icons.info_outline,
+              color: Color.fromARGB(255, 226, 180, 43),
+            ),
             onPressed: () => _showChartInfo(context),
             tooltip: 'Chart Information',
           ),
         ],
+        backgroundColor: Colors.blue[900],
+        centerTitle: true,
       ),
       body:
           expenses.isEmpty
@@ -260,7 +283,21 @@ class _LineChartScreenState extends ConsumerState<LineChartScreen> {
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () => context.push('/add'),
-            child: const Text('Add your first expense'),
+            child: const Text(
+              'Add your first expense',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 226, 180, 43),
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue[900],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
           ),
         ],
       ),
